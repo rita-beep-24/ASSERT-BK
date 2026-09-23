@@ -3,12 +3,19 @@ import { getStore } from '@netlify/blobs';
 const STORE_NAME = 'assert-student-data-v15-clean';
 const DATA_KEY = 'students.json';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-assert-bk-code',
+};
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
+      ...CORS_HEADERS,
     },
   });
 }
@@ -33,6 +40,16 @@ async function readRecords(store) {
 
 export default async (request) => {
   try {
+    // =========================
+    // CORS PREFLIGHT
+    // =========================
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: CORS_HEADERS,
+      });
+    }
+
     const store = getStore(STORE_NAME);
     const method = request.method || 'GET';
 
