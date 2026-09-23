@@ -36,6 +36,9 @@ export default async (request) => {
     const store = getStore(STORE_NAME);
     const method = request.method || 'GET';
 
+    // =========================
+    // GURU BK: READ DATA
+    // =========================
     if (method === 'GET') {
       if (!validCode(request)) {
         return json({ error: 'Unauthorized' }, 401);
@@ -46,11 +49,10 @@ export default async (request) => {
       });
     }
 
+    // =========================
+    // SISWA: SAVE DATA
+    // =========================
     if (method === 'POST') {
-      if (!validCode(request)) {
-        return json({ error: 'Unauthorized' }, 401);
-      }
-
       let payload;
 
       try {
