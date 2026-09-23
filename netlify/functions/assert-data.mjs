@@ -110,6 +110,55 @@ export default async (request) => {
       return json({ ok: true });
     }
 
+    // =========================
+    // GURU BK: DELETE DATA
+    // =========================
+    if (method === 'DELETE') {
+      if (!validCode(request)) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+
+      let payload = {};
+
+      try {
+        payload = await request.json();
+      } catch {
+        payload = {};
+      }
+
+      const requestedKey = String(
+        payload?.key || payload?.player || ''
+      )
+        .trim()
+        .toLowerCase();
+
+      if (!requestedKey) {
+        return json({ error: 'Missing key' }, 400);
+      }
+
+      const records = await readRecords(store);
+
+      const filtered = records.filter((item) => {
+        const itemKey = String(
+          item?.key || item?.player || ''
+        )
+          .trim()
+          .toLowerCase();
+
+        return itemKey !== requestedKey;
+      });
+
+      const deleted = records.length - filtered.length;
+
+      await store.setJSON(DATA_KEY, filtered);
+
+      return json({
+        ok: true,
+        deleted,
+        remaining: filtered.length,
+      });
+    }
+
     return json({ error: 'Method not allowed' }, 405);
   } catch (error) {
     console.error('ASSERT data function error:', error);
